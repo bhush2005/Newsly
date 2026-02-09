@@ -1,0 +1,43 @@
+package com.example.newsly
+
+import android.util.Log
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
+import com.kwabenaberko.newsapilib.NewsApiClient
+import com.kwabenaberko.newsapilib.models.Article
+import com.kwabenaberko.newsapilib.models.request.TopHeadlinesRequest
+import com.kwabenaberko.newsapilib.models.response.ArticleResponse
+
+
+class NewsViewModel : ViewModel() {
+
+    private val _articles = MutableLiveData<List<Article>>()
+    val article: LiveData<List<Article>> = _articles
+
+    init {
+        fetchNewsTopHeadlines()
+    }
+
+    fun fetchNewsTopHeadlines(){
+
+
+        val newsApiClient = NewsApiClient(Constant.apikey)
+        val request = TopHeadlinesRequest.Builder().language("en").build()
+
+
+        newsApiClient.getTopHeadlines(request, object : NewsApiClient.ArticlesResponseCallback{
+            override fun onSuccess(response: ArticleResponse?) {
+                response?.articles?.forEach {
+                    Log.i("NewsAPI Response ", it.title)
+                }
+            }
+
+            override fun onFailure(throwable: Throwable?) {
+                if (throwable != null){
+                    Log.i("NewsAPI Response Failed ", throwable.localizedMessage)
+                }
+            }
+        })
+    }
+}
