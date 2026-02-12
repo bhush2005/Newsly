@@ -28,14 +28,14 @@ class NewsViewModel : ViewModel() {
 
         newsApiClient.getTopHeadlines(request, object : NewsApiClient.ArticlesResponseCallback{
             override fun onSuccess(response: ArticleResponse?) {
-                response?.articles?.forEach {
-                    Log.i("NewsAPI Response ", it.title)
+                response?.articles?.let {
+                    _articles.postValue(it)
                 }
             }
 
             override fun onFailure(throwable: Throwable?) {
                 if (throwable != null){
-                    Log.i("NewsAPI Response Failed ", throwable.localizedMessage)
+                    Log.i("NewsAPI Response Failed", throwable.localizedMessage)
                 }
             }
         })
