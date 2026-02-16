@@ -19,11 +19,33 @@ class NewsViewModel : ViewModel() {
         fetchNewsTopHeadlines()
     }
 
-    fun fetchNewsTopHeadlines(){
+    fun fetchNewsTopHeadlines(category: String = "GENERAL"){
 
 
         val newsApiClient = NewsApiClient(Constant.apikey)
-        val request = TopHeadlinesRequest.Builder().language("en").build()
+        val request = TopHeadlinesRequest.Builder().language("en").category(category).build()
+
+
+        newsApiClient.getTopHeadlines(request, object : NewsApiClient.ArticlesResponseCallback{
+            override fun onSuccess(response: ArticleResponse?) {
+                response?.articles?.let {
+                    _articles.postValue(it)
+                }
+            }
+
+            override fun onFailure(throwable: Throwable?) {
+                if (throwable != null){
+                    Log.i("NewsAPI Response Failed", throwable.localizedMessage)
+                }
+            }
+        })
+    }
+
+    fun fetchEverythingWithQuery(Query : String){
+
+
+        val newsApiClient = NewsApiClient(Constant.apikey)
+        val request = TopHeadlinesRequest.Builder().language("en").q(Query).build()
 
 
         newsApiClient.getTopHeadlines(request, object : NewsApiClient.ArticlesResponseCallback{

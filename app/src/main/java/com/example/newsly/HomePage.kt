@@ -1,5 +1,7 @@
 package com.example.newsly
 
+import androidx.compose.foundation.border
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -11,14 +13,28 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Outline
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontWeight
@@ -36,6 +52,8 @@ fun HomePage(newsViewModel: NewsViewModel) {
     Column(
         modifier = Modifier.fillMaxSize()
     ) {
+        CategoriesBar(newsViewModel)
+
         LazyColumn(
             modifier = Modifier.fillMaxSize()
         ) {
@@ -47,7 +65,7 @@ fun HomePage(newsViewModel: NewsViewModel) {
 }
 
 @Composable
-fun ArticleItem(article: Article){
+fun ArticleItem(article: Article)   {
     Card(
         modifier = Modifier.padding(8.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
@@ -60,7 +78,8 @@ fun ArticleItem(article: Article){
         ) {
             AsyncImage(model = article.urlToImage?:"https://commons.wikimedia.org/wiki/File:No_Image_Available.jpg",
                 contentDescription ="Article image",
-                modifier = Modifier.size(80.dp)
+                modifier = Modifier
+                    .size(80.dp)
                     .aspectRatio(1f),
                 contentScale = ContentScale.Crop
             )
@@ -76,6 +95,79 @@ fun ArticleItem(article: Article){
                     text = article.source.name,
                     maxLines = 1,
                     fontSize = 14.sp)
+            }
+        }
+    }
+}
+
+@Composable
+fun CategoriesBar(newsViewModel: NewsViewModel) {
+
+    var searchQuery by remember { mutableStateOf("") }
+
+    var isSearchExpanded by remember { mutableStateOf(false) }
+
+    val categoryList = listOf(
+        "GENERAL",
+        "BUSINESS",
+        "ENTERTAINMENT",
+        "HEALTH",
+        "SCIENCE",
+        "SPORT",
+        "TECHNOLOGY"
+    )
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .horizontalScroll(rememberScrollState()),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+
+        //Search bar
+        if (isSearchExpanded){
+            OutlinedTextField(
+                modifier = Modifier
+                    .padding(8.dp)
+                    .border(1.dp, color = Color.Gray, shape = CircleShape)
+                    .clip(CircleShape),
+                value = searchQuery,
+                onValueChange = {
+                    searchQuery = it
+                },
+                trailingIcon = {
+                    IconButton(
+                        onClick = {
+                            isSearchExpanded = false
+                            if (searchQuery.isNotEmpty()){
+                                newsViewModel.fetchEverythingWithQuery(searchQuery)
+                            }
+                        }
+                    ) {
+                        Icon(imageVector = Icons.Default.Search,
+                            contentDescription = "Search icon")
+                    }
+                }
+            )
+        } else {
+            IconButton(
+                onClick = {
+                    isSearchExpanded = true
+                }
+            ) {
+                Icon(imageVector = Icons.Default.Search,
+                contentDescription = "Search icon")
+            }
+        }
+        categoryList.forEach { category->
+            Button(
+                onClick = { newsViewModel.fetchNewsTopHeadlines(category) },
+                modifier = Modifier
+                    .padding(4.dp)
+            ) {
+                Text(
+                    text = category
+                )
             }
         }
     }
