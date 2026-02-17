@@ -147,7 +147,8 @@ fun CategoriesBar(newsViewModel: NewsViewModel) {
                         Icon(imageVector = Icons.Default.Search,
                             contentDescription = "Search icon")
                     }
-                }
+                },
+                maxLines = 1
             )
         } else {
             IconButton(
@@ -159,6 +160,9 @@ fun CategoriesBar(newsViewModel: NewsViewModel) {
                 contentDescription = "Search icon")
             }
         }
+
+
+        //News categories
         categoryList.forEach { category->
             Button(
                 onClick = { newsViewModel.fetchNewsTopHeadlines(category) },
